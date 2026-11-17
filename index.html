@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ClinicQ – Appointments and daily care</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Figtree:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#f3f8fa;--surface:#fff;--ink:#12263a;--muted:#587084;--line:#d6e3ea;--teal:#0e7c86;--teal-ink:#fff;--tint:#dff1f2;--coral:#d9482b;--ok:#2f8f5b;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1c27;--surface:#172a38;--ink:#e4eef5;--muted:#93aabb;--line:#2a4254;--teal:#4cc3cc;--teal-ink:#0b1a22;--tint:#1d3d47;--coral:#ff7a5c;--ok:#5fcf93;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1c27;--surface:#172a38;--ink:#e4eef5;--muted:#93aabb;--line:#2a4254;--teal:#4cc3cc;--teal-ink:#0b1a22;--tint:#1d3d47;--coral:#ff7a5c;--ok:#5fcf93;color-scheme:dark}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 Figtree,system-ui,sans-serif}
+h1,h2,h3{font-family:Sora,"Trebuchet MS",sans-serif;line-height:1.2;margin:0}
+.wrap{max-width:900px;margin:0 auto;padding:20px 16px 48px}
+header{padding:10px 0 16px}
+header h1{font-size:clamp(1.9rem,6vw,2.9rem);color:var(--teal)}
+header p{margin:6px 0 0;color:var(--muted);max-width:50ch}
+nav{display:flex;gap:6px;margin-bottom:20px;overflow-x:auto;padding-bottom:2px}
+nav button{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 16px;border-radius:999px;font:600 .98rem Figtree,sans-serif;cursor:pointer;white-space:nowrap}
+nav button[aria-selected="true"]{background:var(--teal);color:var(--teal-ink);border-color:var(--teal)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--coral);outline-offset:2px}
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px;max-width:560px}
+label{display:flex;flex-direction:column;gap:4px;font-weight:600;font-size:.95rem}
+input,select{font:inherit;padding:10px 11px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);min-width:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.slot{padding:10px 0;border-radius:8px;border:1.5px solid var(--teal);background:transparent;color:var(--teal);font:600 .95rem Figtree,sans-serif;cursor:pointer}
+.slot[aria-pressed="true"]{background:var(--teal);color:var(--teal-ink)}
+.slot:disabled{border-color:var(--line);color:var(--muted);text-decoration:line-through;cursor:not-allowed}
+.btn{background:var(--teal);color:var(--teal-ink);border:0;border-radius:8px;padding:11px 16px;font:600 1rem Figtree,sans-serif;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--coral);border:1.5px solid var(--coral)}
+.btn.small{padding:7px 12px;font-size:.9rem}
+.muted{color:var(--muted);font-size:.92rem}
+.list{display:flex;flex-direction:column;gap:10px;max-width:560px}
+.item{background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.item b{font-family:Sora,sans-serif;font-weight:600}
+.item.done{background:var(--tint);border-color:var(--teal)}
+.empty{padding:24px;border:2px dashed var(--line);border-radius:12px;color:var(--muted);max-width:560px}
+.bar{height:10px;border-radius:5px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);border-radius:5px}
+.result{font:700 2.4rem Sora,sans-serif;color:var(--teal)}
+.note{border-left:5px solid var(--coral);padding:8px 12px;background:var(--tint);border-radius:0 8px 8px 0;font-size:.92rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:12px 0 16px}
+.stat{background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:4px}
+.stat b{font:600 1.05rem Sora,sans-serif}
+.item.alert{border-color:var(--coral)}
+a{color:var(--teal)}
+.ecg{display:block;width:100%;max-width:420px;height:44px;margin-top:8px}
+.ecg path{fill:none;stroke:var(--coral);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:520;stroke-dashoffset:520;animation:beat 3s ease-out forwards}
+@keyframes beat{to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){.ecg path{animation:none;stroke-dashoffset:0}}
+.water{display:flex;gap:8px;flex-wrap:wrap}
+.glass{width:38px;height:48px;border:2px solid var(--teal);border-radius:4px 4px 12px 12px;background:transparent;cursor:pointer;padding:0}
+.glass.full{background:var(--teal)}
+.stat:nth-child(1){border-left:5px solid var(--teal)}
+.stat:nth-child(2){border-left:5px solid var(--ok)}
+.stat:nth-child(3){border-left:5px solid var(--coral)}
+.stat:nth-child(4){border-left:5px solid var(--muted)}
+.hero{background:var(--tint);border-radius:14px;padding:12px 16px 6px;margin-bottom:14px;max-width:560px}
+.hero p{margin:0;font:600 1.05rem Sora,sans-serif;color:var(--teal)}
+.hero svg{width:100%;height:auto;display:block}
+.ecg{stroke-dasharray:1500;animation:draw 2.6s ease-out}
+@keyframes draw{from{stroke-dashoffset:1500}to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){.ecg{animation:none}}
+#dinfo{display:flex;align-items:center;gap:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.pill{border:1.5px solid var(--teal);background:transparent;color:var(--teal);border-radius:999px;padding:7px 12px;font:600 .88rem Figtree,sans-serif;cursor:pointer;text-align:left}
+.chat{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow:auto}
+.msg{padding:10px 12px;border-radius:12px;white-space:pre-wrap;max-width:92%}
+.msg.me{background:var(--teal);color:var(--teal-ink);align-self:flex-end}
+.msg.ai{background:var(--tint)}
+.chk{flex-direction:row;align-items:center;font-weight:500;gap:8px}
+[hidden]{display:none!important}
+@media (max-width:520px){.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>ClinicQ</h1>
+  <p>Small checks, steady days. Visits, medicines, vitals and water, all in one place.</p>
+  <svg class="ecg" viewBox="0 0 420 44" aria-hidden="true"><path d="M0 24H120L134 24L144 6L156 40L166 14L174 24H260L274 24L284 6L296 40L306 14L314 24H420"/></svg>
+</header>
+
+<nav role="tablist" aria-label="Sections">
+  <button role="tab" data-tab="home">Home</button>
+  <button role="tab" data-tab="book">Book visit</button>
+  <button role="tab" data-tab="visits">My visits</button>
+  <button role="tab" data-tab="meds">Medicines</button>
+  <button role="tab" data-tab="vitals">Vitals</button>
+  <button role="tab" data-tab="profile">Profile</button>
+  <button role="tab" data-tab="bmi">BMI check</button>
+  <button role="tab" data-tab="ask">Ask AI</button>
+</nav>
+
+<section id="home" hidden>
+  <div class="hero"><p>Stay on beat with your health.</p><svg viewBox="0 0 600 110" role="img" aria-label="Heartbeat line"><path class="ecg" d="M4 70H170l15-8 12 8 14-48 16 88 14-60 10 20H420l15-8 12 8 14-48 16 88 14-60 10 20H596" fill="none" stroke="var(--teal)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <h2 id="hi"></h2>
+  <div class="stats" id="stats"></div>
+  <div class="card" style="margin-bottom:14px"><h3>Water today</h3><div class="water" id="water"></div><div class="muted" id="wtxt" aria-live="polite"></div></div>
+  <div class="note" id="tip" style="margin-bottom:14px;max-width:560px"></div>
+  <div class="card"><h3>Emergency details</h3><div id="emg"></div></div>
+</section>
+
+<section id="book" hidden>
+  <div class="card">
+    <h2>Book a visit</h2>
+    <label>Doctor<select id="doc"></select></label>
+    <div class="muted" id="dinfo"></div>
+    <label>Reason for visit<input id="reason" placeholder="e.g. fever for two days"></label>
+    <div class="two">
+      <label>Date<input id="date" type="date"></label>
+      <label>Your name<input id="pname" autocomplete="name"></label>
+    </div>
+    <div>
+      <div class="muted" style="margin-bottom:6px">Pick a time. Crossed-out times are taken.</div>
+      <div class="slots" id="slots"></div>
+    </div>
+    <button class="btn" id="bookBtn">Confirm booking</button>
+    <div class="muted" id="bmsg" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="visits" hidden><div class="list" id="vlist"></div></section>
+
+<section id="meds" hidden>
+  <div class="card" style="margin-bottom:16px">
+    <h2>Add a medicine</h2>
+    <div class="two">
+      <label>Medicine name<input id="mname"></label>
+      <label>Dose<input id="mdose" placeholder="e.g. 1 tablet"></label>
+    </div>
+    <label>When to take<select id="mwhen"><option>Morning</option><option>Afternoon</option><option>Night</option></select></label>
+    <button class="btn" id="addMed">Add medicine</button>
+  </div>
+  <div class="list">
+    <div class="bar" role="img" id="mbar" aria-label="Progress today"><i></i></div>
+    <div class="muted" id="mprog"></div>
+    <div id="mlist" class="list"></div>
+  </div>
+</section>
+
+<section id="vitals" hidden>
+  <div class="card" style="margin-bottom:16px">
+    <h2>Log vitals</h2>
+    <div class="two"><label>BP systolic (mmHg)<input id="vs" type="number"></label><label>BP diastolic (mmHg)<input id="vd" type="number"></label></div>
+    <div class="two"><label>Blood sugar (mg/dL)<input id="vg" type="number"></label><label>Pulse (bpm)<input id="vp" type="number"></label></div>
+    <button class="btn" id="addV">Save reading</button>
+    <div class="muted" id="vmsg" aria-live="polite"></div>
+  </div>
+  <div id="spark" style="margin-bottom:16px"></div>
+  <div class="list" id="vtl"></div>
+</section>
+
+<section id="profile" hidden>
+  <div class="card">
+    <h2>Your profile</h2>
+    <div class="two"><label>Name<input id="pn"></label><label>Age<input id="pa" type="number"></label></div>
+    <div class="two"><label>Blood group<select id="pb"><option value="">Not set</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></label><label>Allergies<input id="pl" placeholder="e.g. penicillin"></label></div>
+    <div class="two"><label>Emergency contact<input id="pc"></label><label>Contact phone<input id="pp" type="tel"></label></div>
+    <button class="btn" id="saveP">Save profile</button>
+    <div class="muted" id="pmsg" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="ask" hidden>
+  <div class="card">
+    <h2>Ask the care helper</h2>
+    <div class="chips" id="qp"></div>
+    <label class="chk"><input type="checkbox" id="share"> Include my medicines and latest vitals</label>
+    <div class="chat" id="chat" aria-live="polite"></div>
+    <div class="two" style="grid-template-columns:1fr auto"><input id="aq" placeholder="Ask a health question" aria-label="Your question"><button class="btn" id="aSend">Ask</button></div>
+    <div class="note">General information only. The helper cannot diagnose. In an emergency, call your local emergency number.</div>
+  </div>
+</section>
+
+<section id="bmi" hidden>
+  <div class="card">
+    <h2>BMI check</h2>
+    <div class="two">
+      <label>Height (cm)<input id="h" type="number" min="50" max="250"></label>
+      <label>Weight (kg)<input id="w" type="number" min="10" max="300"></label>
+    </div>
+    <button class="btn" id="calc">Calculate BMI</button>
+    <div id="bres" aria-live="polite"></div>
+    <div class="note">BMI is a general screening number, not a diagnosis. Talk to a doctor about your health.</div>
+  </div>
+</section>
+</div>
+
+<script>
+const DOCS=[
+ {n:"Dr. Priya Nair",s:"General physician",f:300,x:12,d:"Mon–Sat"},
+ {n:"Dr. Arun Kumar",s:"Pediatrician",f:400,x:9,d:"Mon–Fri"},
+ {n:"Dr. Fatima Sheikh",s:"Dermatologist",f:600,x:15,d:"Tue, Thu, Sat"},
+ {n:"Dr. Suresh Babu",s:"Orthopedic",f:700,x:18,d:"Mon, Wed, Fri"}
+];
+const TIMES=["09:00","09:30","10:00","10:30","11:00","11:30","14:00","14:30","15:00","15:30","16:00","16:30"];
+const $=s=>document.querySelector(s);
+const today=()=>new Date().toISOString().slice(0,10);
+let S={visits:[],meds:[]},pick=null;
+try{const d=localStorage.getItem("clinicq");if(d)S=JSON.parse(d)}catch(e){}
+S.vitals=S.vitals||[];S.profile=S.profile||{};S.water=S.water||{d:"",n:0};
+const save=()=>{try{localStorage.setItem("clinicq",JSON.stringify(S))}catch(e){}};
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function slots(){
+  const d=$("#doc").value,dt=$("#date").value;
+  const taken=S.visits.filter(v=>v.doc===d&&v.date===dt).map(v=>v.time);
+  if(taken.includes(pick))pick=null;
+  $("#slots").innerHTML=TIMES.map(t=>`<button class="slot" data-t="${t}" aria-pressed="${pick===t}" ${taken.includes(t)?"disabled":""}>${t}</button>`).join("");
+}
+function visits(){
+  const v=S.visits.slice().sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  $("#vlist").innerHTML=v.length?v.map(x=>`<div class="item"><div><b>${esc(x.doc)}</b><div class="muted">${x.date} at ${x.time} · ${esc(x.name)} · fee ₹${x.fee}${x.reason?" · "+esc(x.reason):""}</div></div><button class="btn ghost small" data-cancel="${x.id}">Cancel visit</button></div>`).join(""):'<div class="empty">You have no visits booked. Pick a doctor and time in Book visit.</div>';
+}
+function meds(){
+  const t=today(),done=S.meds.filter(m=>m.last===t).length,all=S.meds.length;
+  $("#mbar").firstElementChild.style.width=(all?done/all*100:0)+"%";
+  $("#mprog").textContent=all?done+" of "+all+" taken today":"No medicines added yet.";
+  const order={Morning:0,Afternoon:1,Night:2};
+  $("#mlist").innerHTML=S.meds.slice().sort((a,b)=>order[a.when]-order[b.when]).map(m=>{
+    const ok=m.last===t;
+    return `<div class="item ${ok?"done":""}"><div><b>${esc(m.name)}</b><div class="muted">${esc(m.dose||"As prescribed")} · ${m.when}</div></div><div><button class="btn small ${ok?"ghost":""}" data-take="${m.id}">${ok?"Undo":"Mark taken"}</button> <button class="btn ghost small" data-del="${m.id}" aria-label="Remove ${esc(m.name)}">Remove</button></div></div>`}).join("");
+}
+function tab(t){
+  if(!["home","book","visits","meds","vitals","profile","bmi","ask"].includes(t))t="home";
+  document.querySelectorAll("section").forEach(s=>s.hidden=s.id!==t);
+  document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+  if(t==="home")home();if(t==="visits")visits();if(t==="meds")meds();if(t==="vitals")vitals();if(t==="profile")profile();if(t==="book"&&!$("#pname").value)$("#pname").value=S.profile.name||"";
+}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{location.hash=b.dataset.tab});
+addEventListener("hashchange",()=>tab(location.hash.slice(1)));
+
+$("#doc").innerHTML=DOCS.map(d=>`<option value="${d.n}">${d.n} – ${d.s} (₹${d.f})</option>`).join("");
+$("#date").value=today();$("#date").min=today();
+$("#doc").onchange=()=>{pick=null;slots();dinfo()};$("#date").onchange=()=>{pick=null;slots()};
+$("#slots").onclick=e=>{const t=e.target.dataset.t;if(t){pick=t;slots()}};
+$("#bookBtn").onclick=()=>{
+  const name=$("#pname").value.trim(),m=$("#bmsg");
+  if(!name){m.textContent="Enter your name to book.";return}
+  if(!pick){m.textContent="Pick a time slot first.";return}
+  const d=DOCS.find(x=>x.n===$("#doc").value);
+  S.visits.push({id:Date.now(),doc:d.n,date:$("#date").value,time:pick,name,fee:d.f,reason:$("#reason").value.trim()});$("#reason").value="";
+  save();m.textContent="Booked "+d.n+" at "+pick+". See it in My visits.";pick=null;slots();
+};
+$("#vlist").onclick=e=>{const id=e.target.dataset.cancel;if(id){S.visits=S.visits.filter(v=>v.id!=id);save();visits();slots()}};
+$("#addMed").onclick=()=>{
+  const n=$("#mname").value.trim();if(!n)return;
+  S.meds.push({id:Date.now(),name:n,dose:$("#mdose").value.trim(),when:$("#mwhen").value,last:""});
+  $("#mname").value="";$("#mdose").value="";save();meds();
+};
+$("#mlist").onclick=e=>{
+  const t=e.target.dataset;
+  if(t.take){const m=S.meds.find(x=>x.id==t.take);m.last=m.last===today()?"":today()}
+  if(t.del)S.meds=S.meds.filter(x=>x.id!=t.del);
+  if(t.take||t.del){save();meds()}
+};
+$("#calc").onclick=()=>{
+  const h=+$("#h").value/100,w=+$("#w").value,r=$("#bres");
+  if(!h||!w){r.innerHTML='<div class="muted">Enter your height and weight to see your BMI.</div>';return}
+  const b=w/(h*h),c=b<18.5?"Below the usual range":b<25?"In the usual range":b<30?"Above the usual range":"Well above the usual range";
+  r.innerHTML=`<div class="result">${b.toFixed(1)}</div><div><b>${c}</b></div>`;
+};
+function dinfo(){const d=DOCS.find(x=>x.n===$("#doc").value);$("#dinfo").innerHTML=avatar(DOCS.indexOf(d))+"<span>"+esc(d.s)+" · "+d.x+" years of experience · Available "+esc(d.d)+"</span>"}
+function home(){
+  const p=S.profile,t=today();
+  const hr=new Date().getHours(),gr=hr<12?"Good morning":hr<17?"Good afternoon":"Good evening";
+  $("#hi").textContent=gr+(p.name?", "+p.name:"")+" 👋";
+  const up=S.visits.filter(v=>v.date>=t).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time))[0];
+  const done=S.meds.filter(m=>m.last===t).length,lv=S.vitals[0];
+  $("#stats").innerHTML=[
+    ["Next visit",up?up.date+" at "+up.time+" with "+esc(up.doc):"None booked"],
+    ["Medicines today",S.meds.length?done+" of "+S.meds.length+" taken":"None added"],
+    ["Latest vitals",lv?lv.sys+"/"+lv.dia+" mmHg, "+lv.sugar+" mg/dL":"No readings yet"],
+    ["Visits booked",S.visits.length]
+  ].map(([a,b])=>`<div class="stat"><div class="muted">${a}</div><b>${b}</b></div>`).join("");
+  const bits=[];
+  if(p.ecn)bits.push(`Contact: ${esc(p.ecn)}${p.ecp?` · <a href="tel:${esc(p.ecp)}">${esc(p.ecp)}</a>`:""}`);
+  if(p.bg)bits.push("Blood group: "+esc(p.bg));
+  if(p.allergy)bits.push("Allergies: "+esc(p.allergy));
+  if(S.water.d!==t)S.water={d:t,n:0};
+  $("#water").innerHTML=Array.from({length:8},(_,i)=>`<button class="glass ${i<S.water.n?"full":""}" data-g="${i+1}" aria-label="Glass ${i+1}" aria-pressed="${i<S.water.n}"></button>`).join("");
+  $("#wtxt").textContent=S.water.n+" of 8 glasses"+(S.water.n>=8?". Goal reached!":". Tap a glass each time you drink.");
+  const TIPS=["Stand up and stretch for a minute every hour.","Add one extra serving of vegetables to a meal today.","A 15-minute walk after a meal is an easy habit.","Wash your hands before you eat.","Keep a regular bedtime, even on weekends.","Take three slow breaths when you feel rushed.","Keep your medicines where you will see them."];
+  $("#tip").textContent="Tip of the day: "+TIPS[new Date().getDate()%TIPS.length];
+  $("#emg").innerHTML=bits.length?bits.join("<br>"):'<span class="muted">Add a contact, blood group and allergies in Profile.</span>';
+}
+function vitals(){spark();
+  $("#vtl").innerHTML=S.vitals.length?S.vitals.slice(0,8).map(v=>{
+    const hi=v.sys>=140||v.dia>=90||v.sys<90||v.sugar>=200;
+    return `<div class="item ${hi?"alert":""}"><div><b>${v.sys}/${v.dia} mmHg · ${v.sugar} mg/dL</b><div class="muted">${v.date} · pulse ${v.pulse} bpm${hi?" · Outside the usual range. Consider talking to a doctor.":""}</div></div></div>`}).join(""):'<div class="empty">No readings yet. Save your first reading above.</div>';
+}
+function profile(){const p=S.profile;$("#pn").value=p.name||"";$("#pa").value=p.age||"";$("#pb").value=p.bg||"";$("#pl").value=p.allergy||"";$("#pc").value=p.ecn||"";$("#pp").value=p.ecp||""}
+$("#saveP").onclick=()=>{S.profile={name:$("#pn").value.trim(),age:$("#pa").value,bg:$("#pb").value,allergy:$("#pl").value.trim(),ecn:$("#pc").value.trim(),ecp:$("#pp").value.trim()};save();$("#pmsg").textContent="Profile saved."};
+$("#addV").onclick=()=>{
+  const v={id:Date.now(),date:today(),sys:+$("#vs").value,dia:+$("#vd").value,sugar:+$("#vg").value,pulse:+$("#vp").value};
+  if(!v.sys||!v.dia||!v.sugar||!v.pulse){$("#vmsg").textContent="Fill in all four readings.";return}
+  S.vitals.unshift(v);save();["#vs","#vd","#vg","#vp"].forEach(i=>$(i).value="");$("#vmsg").textContent="Reading saved.";vitals();
+};
+$("#water").onclick=e=>{const g=+e.target.dataset.g;if(g){S.water.n=S.water.n===g?g-1:g;save();home()}};
+const COL=["#0e7c86","#d9482b","#7a5cc8","#d98e1f"];
+function avatar(i){const c=COL[i%4];return `<svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true" style="flex:none"><circle cx="26" cy="26" r="26" fill="${c}" opacity=".18"/><circle cx="26" cy="19" r="8" fill="${c}"/><path d="M8 50c2-12 10-18 18-18s16 6 18 18z" fill="#fff" stroke="${c}" stroke-width="2"/><path d="M19 34v5a7 7 0 0 0 14 0v-5" fill="none" stroke="${c}" stroke-width="2"/><circle cx="33" cy="43" r="2.5" fill="${c}"/></svg>`}
+function spark(){
+  const a=S.vitals.slice(0,8).reverse().map(v=>v.sys),el=$("#spark");
+  if(a.length<2){el.innerHTML="";return}
+  const mn=Math.min(...a)-5,mx=Math.max(...a)+5,W=560,H=80,p=a.map((v,i)=>[6+i*(W-12)/(a.length-1),H-(v-mn)/(mx-mn)*H+4]);
+  el.innerHTML=`<div class="card"><h3>Systolic trend</h3><svg viewBox="0 0 ${W} ${H+10}" role="img" aria-label="Systolic pressure over your last ${a.length} readings" style="width:100%"><polyline fill="none" stroke="var(--teal)" stroke-width="3" points="${p.map(q=>q.join(",")).join(" ")}"/>${p.map(q=>`<circle cx="${q[0]}" cy="${q[1]}" r="4.5" fill="var(--coral)"/>`).join("")}</svg><div class="muted">Last ${a.length} readings: ${a[0]} to ${a[a.length-1]} mmHg</div></div>`;
+}
+const QP=["What should I ask my doctor?","Tips to remember my medicines","Which doctor for a skin rash?"];
+$("#qp").innerHTML=QP.map(q=>`<button class="pill" data-q="${q}">${q}</button>`).join("");
+$("#chat").innerHTML='<div class="msg ai">Hi, I’m your care helper. Ask a general health question, or ask which doctor to book.</div>';
+let sample=null;
+(window.claude?window.claude.use("sample"):Promise.resolve(null)).then(s=>{sample=s;if(!s){$("#aSend").disabled=true;$("#aq").placeholder="The helper isn’t available in this view"}}).catch(()=>{$("#aSend").disabled=true});
+async function ask(q){
+  if(!q||!sample)return;
+  const chat=$("#chat");
+  chat.insertAdjacentHTML("beforeend",`<div class="msg me">${esc(q)}</div><div class="msg ai">Thinking…</div>`);
+  const out=chat.lastElementChild;chat.scrollTop=chat.scrollHeight;$("#aq").value="";
+  let ctx="";
+  if($("#share").checked){const v=S.vitals[0];ctx=" The person’s medicines: "+(S.meds.map(m=>m.name+" "+m.dose+" "+m.when).join("; ")||"none")+". Latest vitals: "+(v?v.sys+"/"+v.dia+" mmHg, sugar "+v.sugar+" mg/dL, pulse "+v.pulse:"none")+"."}
+  const sys="You are the care helper inside ClinicQ, a clinic booking app. Give general health information in plain language, under 120 words. Never diagnose, never give medicine doses, and tell the person to call emergency services for red-flag symptoms such as chest pain or trouble breathing. When relevant, suggest booking one of these doctors: "+DOCS.map(d=>d.n+" ("+d.s+")").join(", ")+"."+ctx;
+  try{const r=await sample(sys+"\n\nQuestion: "+q,{cache:false,modelTier:"quick",onText:({text})=>{out.textContent=text;chat.scrollTop=chat.scrollHeight}});out.textContent=r.text}
+  catch(e){out.textContent=e&&e.code==="not_granted"?"Permission was declined, so the helper can’t answer.":"The helper couldn’t answer right now. Try again in a moment."}
+}
+$("#aSend").onclick=()=>ask($("#aq").value.trim());
+$("#aq").onkeydown=e=>{if(e.key==="Enter")ask($("#aq").value.trim())};
+$("#qp").onclick=e=>{if(e.target.dataset.q)ask(e.target.dataset.q)};
+dinfo();slots();meds();tab(location.hash.slice(1));
+</script>
+</body>
+</html>
